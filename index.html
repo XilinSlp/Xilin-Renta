@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="es">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <title>Carrusel Tailwind v4 (CDN)</title>
+</head>
+
+<body class="bg-neutral-950 text-white antialiased">
+
+
+
+
+    <!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <title>Navbar con redes</title>
+</head>
+<body class="antialiased bg-neutral-50">
+
+  <!-- NAVBAR -->
+  <header class="bg-white shadow-sm">
+    <!-- Sin padding para que los íconos queden realmente “a la orilla” -->
+    <nav class="h-14 flex items-center justify-between">
+      <!-- Logo a la izquierda (área clickeable amplia) -->
+      <a href="/" class="inline-flex items-center h-full pl-3">
+        <img
+          src="./assets/banners/xilin-logo-negro.svg"
+          alt="Tu marca"
+          class="block h-8 w-auto"
+          loading="eager"
+          fetchpriority="high"
+        />
+      </a>
+
+      <!-- Redes a la derecha, cada ícono con borde separador y pegados al borde -->
+      <div class="ml-auto flex">
+        <a
+          href="https://www.instagram.com/xilinslp"
+          aria-label="Instagram"
+          class="inline-flex items-center justify-center h-14 w-14  hover:bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-neutral-300"
+          target="_blank" rel="noopener"
+        >
+          <!-- Instagram SVG -->
+          <img src="./assets/iconos/ig.png" width="25px" alt="">
+        </a>
+
+        <a
+          href="https://www.linkedin.com/authwall?trkInfo=AQFgmDblww9WvAAAAZk7K5EYKpKcZekYNmXhUlMxLfCHp5UpM_GCFGIP0Ud1J50leeBMxgS3Kg1gRlycD7uIigjbVn8HUctbV_32mA2BMC2gS6im8YySRkO1CjusNQHyy4bumM8=&original_referer=&sessionRedirect=https%3A%2F%2Fwww.linkedin.com%2Fcompany%2Fxilinslp%2Fposts%2F%3FfeedView%3Dall%26viewAsMember%3Dtrue"
+          aria-label="X (Twitter)"
+          class="inline-flex items-center justify-center h-14 w-14  hover:bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-neutral-300"
+          target="_blank" rel="noopener"
+        >
+          <!-- linke -->
+          <img src="./assets/iconos/in.png" width="25px" alt="">
+        </a>
+        <a
+          href="https://twitter.com/"
+          aria-label="X (Twitter)"
+          class="inline-flex items-center justify-center h-14 w-14  hover:bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-neutral-300"
+          target="_blank" rel="noopener"
+        >
+          <!-- fb -->
+          <img src="./assets/iconos/fb.png" width="25px" alt="">
+        </a>
+      </div>
+    </nav>
+  </header>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <!-- Carrusel -->
+    <section class="relative ">
+        <!-- Track -->
+        <div id="tw-carousel" class="group relative overflow-hidden shadow-xl" aria-roledescription="carrusel">
+            <!-- Slides wrapper (scroll-snap) -->
+            <ul class="flex snap-x snap-mandatory overflow-x-auto scroll-smooth touch-pan-x no-scrollbar" tabindex="0"
+                role="listbox" aria-label="Galería de imágenes">
+                <!-- Diapositiva 1 -->
+                <li class="relative w-full shrink-0 snap-start" role="option" aria-selected="true">
+                    <picture>
+                        <!-- Desktop / tablet (>=640px) -->
+                        <source media="(min-width:640px)" srcset="./assets/banners/banner1.png_" />
+                        <!-- Mobile por defecto -->
+                        <img src="./assets/banners/banner1mobi.png" alt="Paisaje 1"
+                            class="block w-full h-[100svh] sm:h-[60svh] object-cover" loading="lazy" draggable="false" />
+                    </picture>
+                </li>
+
+                
+
+                <!-- Agrega más <li> con tus imágenes… -->
+            </ul>
+
+            <!-- Controles -->
+            <button type="button" data-dir="prev" aria-label="Anterior"
+                class="absolute left-3 top-1/2 -translate-y-1/2 grid place-items-center w-10 h-10 rounded-full backdrop-blur bg-white/10 hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-white/50">
+                <!-- ‹ -->
+                <span aria-hidden="true" class="text-xl leading-none select-none">‹</span>
+            </button>
+
+            <button type="button" data-dir="next" aria-label="Siguiente"
+                class="absolute right-3 top-1/2 -translate-y-1/2 grid place-items-center w-10 h-10 rounded-full backdrop-blur bg-white/10 hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-white/50">
+                <!-- › -->
+                <span aria-hidden="true" class="text-xl leading-none select-none">›</span>
+            </button>
+
+            <!-- Indicadores -->
+            <div class="pointer-events-none absolute inset-x-0 bottom-3 flex items-center justify-center gap-1.5"
+                aria-hidden="true">
+                <div id="tw-dots" class="pointer-events-auto flex gap-1.5"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Utilidad para ocultar scrollbar (opcional, solo Tailwind) -->
+    <style>
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+
+    <!-- Script: navegación, bullets y accesibilidad -->
+    <script>
+        (() => {
+            const $carousel = document.querySelector('#tw-carousel');
+            const $track = $carousel.querySelector('ul');
+            const $slides = Array.from($track.children);
+            const $prev = $carousel.querySelector('[data-dir="prev"]');
+            const $next = $carousel.querySelector('[data-dir="next"]');
+            const $dotsWrap = document.querySelector('#tw-dots');
+
+            // Crear bullets en base a slides
+            const dots = $slides.map((_, i) => {
+                const b = document.createElement('button');
+                b.type = 'button';
+                b.className =
+                    'w-2.5 h-2.5 rounded-full bg-white/40 hover:bg-white/70 focus:ring-2 focus:ring-white/50 transition';
+                b.setAttribute('aria-label', `Ir a la diapositiva ${i + 1}`);
+                b.addEventListener('click', () => goTo(i));
+                $dotsWrap.appendChild(b);
+                return b;
+            });
+
+            const slideWidth = () => $track.clientWidth;
+
+            function currentIndex() {
+                const idx = Math.round($track.scrollLeft / slideWidth());
+                return Math.max(0, Math.min(idx, $slides.length - 1));
+            }
+
+            function updateARIA(idx) {
+                $slides.forEach((li, i) => {
+                    li.setAttribute('aria-selected', i === idx ? 'true' : 'false');
+                });
+                dots.forEach((d, i) => {
+                    d.classList.toggle('bg-white', i === idx);
+                    d.classList.toggle('bg-white/40', i !== idx);
+                });
+            }
+
+            function goTo(i) {
+                const x = i * slideWidth();
+                $track.scrollTo({ left: x, behavior: 'smooth' });
+                updateARIA(i);
+            }
+
+            function next() { goTo(Math.min(currentIndex() + 1, $slides.length - 1)); }
+            function prev() { goTo(Math.max(currentIndex() - 1, 0)); }
+
+            // Botones
+            $next.addEventListener('click', next);
+            $prev.addEventListener('click', prev);
+
+            // Teclado
+            $track.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowRight') next();
+                if (e.key === 'ArrowLeft') prev();
+            });
+
+            // Sincroniza bullets al hacer swipe/scroll
+            let raf = null;
+            $track.addEventListener('scroll', () => {
+                if (raf) cancelAnimationFrame(raf);
+                raf = requestAnimationFrame(() => updateARIA(currentIndex()));
+            });
+
+            // Recalcular en resize
+            new ResizeObserver(() => goTo(currentIndex())).observe($track);
+
+            // Init
+            updateARIA(0);
+        })();
+    </script>
+</body>
+
+</html>
