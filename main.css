@@ -4,3 +4,13 @@
     border: 1px solid black;
     color: white;
 }
+
+.titulo{
+    font-family: Archivo Black;
+    font-style: italic;
+}
+.back-perso{
+background: #000000;
+background: linear-gradient(90deg, rgba(0, 0, 0, 1) 0%, rgba(51, 51, 51, 1) 94%);
+
+}
