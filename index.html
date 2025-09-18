@@ -697,26 +697,25 @@
       </div>
     </div>
 
-    <!-- Contenedor del video (responsive 16:9) -->
-    <div class="relative mx-auto max-w-4xl">
-      <div class="relative w-full overflow-hidden rounded-md shadow-[0_12px_28px_rgba(0,0,0,.45)]">
-        <div class="relative pb-[56.25%]"> <!-- 16:9 -->
-          <!-- YouTube: reemplaza el src por tu video -->
-          <iframe
-            class="absolute inset-0 w-full h-full"
-            src="https://www.youtube.com/embed/vvpjgCGcOoU?si=VwFkjHMHZx95EOyt"
-            title="Video"
-            frameborder="0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-            allowfullscreen
-            loading="lazy"
-          ></iframe>
-        </div>
-      </div>
+   <!-- Contenedor video con YouTube Embed Lite -->
+<div class="relative mx-auto max-w-4xl">
+  <div class="relative w-full overflow-hidden rounded-md shadow-[0_12px_28px_rgba(0,0,0,.45)]">
+    <!-- Lite YouTube embed -->
+    <lite-youtube
+      videoid="vvpjgCGcOoU"
+      params="rel=0"
+      style="background-image: url('https://i.ytimg.com/vi/vvpjgCGcOoU/hqdefault.jpg');"
+      class="relative block w-full aspect-video rounded-md overflow-hidden"
+    >
+      <button type="button" class="lty-playbtn" title="Reproducir">
+        <span class="sr-only">Reproducir video</span>
+      </button>
+    </lite-youtube>
+  </div>
 
-      <!-- Pequeño “recorte” rojo frente al paralelogramo izquierdo (detalle opcional) -->
-      <div class="hidden sm:block absolute left-24 -bottom-4 w-24 h-6 -skew-x-[18deg] bg-[#c93127]"></div>
-    </div>
+  <!-- Pequeño “recorte” rojo frente al paralelogramo izquierdo -->
+  <div class="hidden sm:block absolute left-24 -bottom-4 w-24 h-6 -skew-x-[18deg] bg-[#c93127]"></div>
+</div>
 
   </div>
 </section>
@@ -1382,6 +1381,12 @@ document.getElementById('mc-embedded-subscribe-form').addEventListener('submit',
                 updateARIA(0);
             })();
         </script>
+
+        <!-- Scripts necesarios (colócalos al final de tu <body>) -->
+<script src="https://cdn.jsdelivr.net/npm/lite-youtube-embed@0.3.0/src/lite-yt-embed.js"></script>
+
+<!-- Estilos de lite-youtube -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lite-youtube-embed@0.3.0/src/lite-yt-embed.css" />
     </body>
 
     </html>
