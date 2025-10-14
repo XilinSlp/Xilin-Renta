@@ -1,55 +1,45 @@
 // netlify/functions/submit.js
-import fetch from 'node-fetch';
+exports.config = { path: "/api/submit" };
 
-export const config = { path: "/api/submit" };
-
-export async function handler(event) {
+exports.handler = async (event) => {
   try {
     if (event.httpMethod !== 'POST') {
       return { statusCode: 405, body: 'Method Not Allowed' };
     }
 
-    // Parse multipart/form-data o x-www-form-urlencoded
-    const contentType = event.headers['content-type'] || '';
+    const ct = event.headers['content-type'] || '';
     let data = {};
-    if (contentType.includes('multipart/form-data')) {
-      // Netlify parse no built-in: usa URLSearchParams con body crudo no sirve para multipart.
-      // Truco simple: convierte FormData en x-www-form-urlencoded desde el cliente (opción) o usa un parser.
-      // Para mantenerlo simple aquí, asumiremos x-www-form-urlencoded en el cliente.
-      return { statusCode: 400, body: 'Envia como application/x-www-form-urlencoded o JSON' };
-    } else if (contentType.includes('application/json')) {
+    if (ct.includes('application/json')) {
       data = JSON.parse(event.body || '{}');
     } else {
-      // asume x-www-form-urlencoded
-      data = Object.fromEntries(new URLSearchParams(event.body));
+      // x-www-form-urlencoded
+      data = Object.fromEntries(new URLSearchParams(event.body || ''));
     }
 
-    // Campos del form
     const {
       FNAME, EMAIL, PHONE, SELECSTADO, PUESTOEMP, REQUIERE, EQUIPO,
       ASESORIA, TIPO, ADITAMIENT, MENSAJE, recaptcha_token
     } = data;
 
-    // 1) Validar reCAPTCHA
-    const r = await fetch('https://www.google.com/recaptcha/api/siteverify', {
+    // 1) Validar reCAPTCHA (usa tu RECAPTCHA_SECRET en Netlify)
+    const verify = await fetch('https://www.google.com/recaptcha/api/siteverify', {
       method: 'POST',
-      headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: new URLSearchParams({
-        secret: process.env.RECAPTCHA_SECRET,  // <-- ENV
+        secret: process.env.RECAPTCHA_SECRET,
         response: recaptcha_token
       })
-    }).then(res => res.json());
+    }).then(r => r.json());
 
-    if (!r.success || (r.score !== undefined && r.score < 0.5)) {
+    if (!verify.success || (verify.score !== undefined && verify.score < 0.5)) {
       return { statusCode: 400, body: 'Fallo reCAPTCHA' };
     }
 
-    // 2) Enviar a Google Apps Script (si sigues usando tu WebApp)
-    // Guardas la URL en env y NO la expones en el cliente.
+    // 2) Reenviar a Google Apps Script (oculto en env)
     if (process.env.GS_WEBAPP_URL) {
       await fetch(process.env.GS_WEBAPP_URL, {
         method: 'POST',
-        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: new URLSearchParams({
           name: FNAME,
           email: EMAIL,
@@ -66,9 +56,9 @@ export async function handler(event) {
       });
     }
 
-    // 3) Suscribir a Mailchimp vía API (recomendado en vez del <form action>)
+    // 3) (OPCIONAL) Suscribir a Mailchimp vía API (si configuras envs)
     if (process.env.MC_API_KEY && process.env.MC_SERVER_PREFIX && process.env.MC_LIST_ID) {
-      const mcServer = process.env.MC_SERVER_PREFIX; // ej. "us14"
+      const mcServer = process.env.MC_SERVER_PREFIX;
       const mcListId = process.env.MC_LIST_ID;
 
       const mcRes = await fetch(`https://${mcServer}.api.mailchimp.com/3.0/lists/${mcListId}/members`, {
@@ -92,22 +82,20 @@ export async function handler(event) {
             ADITAMIENT: ADITAMIENT || '',
             MENSAJE: MENSAJE || ''
           },
-          tags: ['7325519'] // si quieres mantener tag
+          tags: ['7325519']
         })
       });
 
       if (!mcRes.ok) {
         const txt = await mcRes.text();
         console.error('Mailchimp error:', txt);
-        // no abortamos si solo falla Mailchimp; decide tu política:
-        // return { statusCode: 502, body: 'Mailchimp error' };
+        // Decide si abortar o continuar; aquí continuamos.
       }
     }
 
     return { statusCode: 200, body: 'OK' };
-
   } catch (err) {
     console.error(err);
     return { statusCode: 500, body: 'Server error' };
   }
-}
+};
