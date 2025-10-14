@@ -1263,7 +1263,7 @@ document.getElementById('mc-embedded-subscribe-form').addEventListener('submit',
                     const b = document.createElement('button');
                     b.type = 'button';
                     b.className =
-                        'w-4 h-4 rounded-full bg-white/40 hover:bg-white/70 focus:ring-2 focus:ring-white/50 transition';
+                    'w-12 h-12 mx-2 rounded-full bg-white/40 hover:bg-white/70 focus:outline-none focus:ring-2 focus:ring-white/50 transition';
                     b.setAttribute('aria-label', `Ir a la diapositiva ${i + 1}`);
                     b.addEventListener('click', () => goTo(i));
                     $dotsWrap.appendChild(b);
