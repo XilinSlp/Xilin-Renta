@@ -2,7 +2,7 @@
 <html lang="es">
 
 <head>
-    
+
     <!-- Google Recaptcha -->
     <script src="https://www.google.com/recaptcha/api.js?render=6LetH4sqAAAAADUkfe67jIEvLkRU0qcvaU2Vhe81"></script>
 
@@ -876,35 +876,6 @@
                 
                 <div aria-hidden="true" style="position: absolute; left: -5000px;"><input type="text" name="b_c94b27e74f56092fcbb938573_7e912b06e1" tabindex="-1" value="">
                 </div>
-                
-                <script>
-                const form = document.getElementById('lead-form');
-
-                form.addEventListener('submit', async (e) => {
-                    e.preventDefault();
-
-                    // 1) reCAPTCHA token
-                    const token = await grecaptcha.execute('6LetH4sqAAAAADUkfe67jIEvLkRU0qcvaU2Vhe81', {action: 'submit'});
-
-                    // 2) Construir payload con los campos del form + token
-                    const fd = new FormData(form);
-                    fd.append('recaptcha_token', token);
-
-                    // 3) Enviar al backend (Netlify Function)
-                    const res = await fetch('/api/submit', {
-                    method: 'POST',
-                    body: fd
-                    });
-
-                    if (res.ok) {
-                    // redirige a tu página de gracias
-                    window.location.href = '/thank-you62433527';
-                    } else {
-                    alert('No pudimos enviar tu solicitud. Intenta de nuevo.');
-                    console.error(await res.text());
-                    }
-                });
-                </script>
 
                 <div class="clear">
                 <!--
