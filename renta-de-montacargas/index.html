@@ -4,7 +4,7 @@
 <head>
     <!-- Google Recaptcha -->
     <script src="https://www.google.com/recaptcha/api.js"></script>
-    
+
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
 
@@ -12,12 +12,15 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <title>Renta de Montacargas Eléctricos | Xilin Mexico SLP</title>
-
+    
     <link rel="stylesheet" href="../main.css" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Archivo Black">
-
+    
     <link rel="icon" href="/assets/iconos/favicon.ico?v=2" sizes="any">
     <link rel="apple-touch-icon" sizes="180x180" href="/assets/iconos/apple-touch-icon.png?v=2">
+    
+    <script src="../assets/js/carrusel.js" defer></script>
+    <script src="../assets/js/formulario.js" defer></script>
 
 
 
@@ -849,94 +852,6 @@ data-action='submit'>
 </form>
 </div>
 </div>
-<script>
-// Función que se llama cuando el reCAPTCHA se completa
-function onSubmit(token) {
-    handleSubmitForm(token);
-}
-// Manejar el envío del formulario
-function handleSubmitForm(token) {
-    // Prevenir el comportamiento por defecto del formulario
-    event.preventDefault();
-    // Obtener los valores de los campos del formulario
-    const name = document.getElementById('mce-FNAME').value;
-    const email = document.getElementById('mce-EMAIL').value;
-    const phone = document.getElementById('mce-PHONE').value;  
-    const estado = document.getElementById('mce-SELECSTADO').value;
-    const requiere = document.getElementById('mce-REQUIERE').value;
-    const equipo = document.getElementById('mce-EQUIPO').value;
-    const asesoria = document.getElementById('mce-ASESORIA').value;
-    const tipo = document.getElementById('mce-TIPO').value;
-    const aditamento = document.getElementById('mce-ADITAMIENT').value;
-    const mensaje = document.getElementById('mce-MENSAJE').value;
-    const puesto = document.getElementById('mce-PUESTOEMP').value;
-    // Validar que todos los campos requeridos tengan información
-    if (!name || !email || !phone || !estado || !requiere || !equipo || !asesoria || !tipo || !aditamento || !mensaje || !puesto) {
-        console.error('Por favor completa todos los campos requeridos.');
-        alert('Por favor, completa todos los campos antes de enviar el formulario.');
-        return; // Detener el envío si falta información
-    }
-    // URL de Google Apps Script
-    const googleSheetsUrl = 'https://script.google.com/macros/s/AKfycbz1HRm1kAGcvo4yf-otJigWtdFKgpjOySilBZ4UYLtepUBMxa-2pJrTs5YdlADkcMCJ3A/exec';
-    // Enviar los datos a Google Sheets
-    fetch(googleSheetsUrl, {
-        method: 'POST',
-        body: new URLSearchParams({
-            name: name,
-            email: email,
-            phone: phone,  
-            puesto: puesto,
-            estado: estado,
-            requiere: requiere,
-            equipo: equipo,
-            asesoria: asesoria,
-            tipo: tipo,
-            aditamento: aditamento,
-            mensaje: mensaje,
-        }),
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-        },
-    })
-        .then((response) => {
-            if (!response.ok) {
-                console.error('Error al enviar a Google Sheets:', response.statusText);
-                throw new Error(`HTTP error! Status: ${response.status}`);
-            }
-            return response.text();
-        })
-        .then((data) => {
-            console.log('Respuesta de Google Sheets:', data);
-            // Enviar formulario a Mailchimp después de confirmar que Google Sheets recibió los datos
-            const form = document.getElementById('mc-embedded-subscribe-form');
-            fetch(form.action, {
-                method: 'POST',
-                body: new FormData(form),
-                mode: 'no-cors',
-            })
-                .then(() => {
-                    window.location.href = 'https://www.xilinslp.com.mx/gracias-renta-montacarga';
-                })
-                .catch((error) => {
-                    console.error('Error al enviar a Mailchimp:', error);
-                    alert('Hubo un problema al enviar tu suscripción. Por favor, inténtalo de nuevo.');
-                });
-        })
-        .catch((error) => {
-            console.error('Error en la solicitud a Google Sheets:', error);
-        });
-}
-// Manejar el envío del formulario con reCAPTCHA
-document.getElementById('mc-embedded-subscribe-form').addEventListener('submit', function (event) {
-    event.preventDefault();
-    grecaptcha.ready(function () {
-        grecaptcha.execute('6LetH4sqAAAAADUkfe67jIEvLkRU0qcvaU2Vhe81', { action: 'submit' })
-            .then(function (token) {
-                handleSubmitForm(token);
-            });
-    });
-});
-</script>
 
         <!-- Utilidad para ocultar scrollbar (opcional, solo Tailwind) -->
         <style>
@@ -950,78 +865,6 @@ document.getElementById('mc-embedded-subscribe-form').addEventListener('submit',
             }
         </style>
 
-        <!-- Script: navegación, bullets y accesibilidad -->
-        <script>
-            (() => {
-                const $carousel = document.querySelector('#tw-carousel');
-                const $track = $carousel.querySelector('ul');
-                const $slides = Array.from($track.children);
-                const $prev = $carousel.querySelector('[data-dir="prev"]');
-                const $next = $carousel.querySelector('[data-dir="next"]');
-                const $dotsWrap = document.querySelector('#tw-dots');
-
-                // Crear bullets en base a slides
-                const dots = $slides.map((_, i) => {
-                    const b = document.createElement('button');
-                    b.type = 'button';
-                    b.className =
-                    'w-5 h-5 mx-2 rounded-full bg-white/40 hover:bg-white/70 focus:outline-none focus:ring-2 focus:ring-white/50 transition';
-                    b.setAttribute('aria-label', `Ir a la diapositiva ${i + 1}`);
-                    b.addEventListener('click', () => goTo(i));
-                    $dotsWrap.appendChild(b);
-                    return b;
-                });
-
-                const slideWidth = () => $track.clientWidth;
-
-                function currentIndex() {
-                    const idx = Math.round($track.scrollLeft / slideWidth());
-                    return Math.max(0, Math.min(idx, $slides.length - 1));
-                }
-
-                function updateARIA(idx) {
-                    $slides.forEach((li, i) => {
-                        li.setAttribute('aria-selected', i === idx ? 'true' : 'false');
-                    });
-                    dots.forEach((d, i) => {
-                        d.classList.toggle('bg-white', i === idx);
-                        d.classList.toggle('bg-white/40', i !== idx);
-                    });
-                }
-
-                function goTo(i) {
-                    const x = i * slideWidth();
-                    $track.scrollTo({ left: x, behavior: 'smooth' });
-                    updateARIA(i);
-                }
-
-                function next() { goTo(Math.min(currentIndex() + 1, $slides.length - 1)); }
-                function prev() { goTo(Math.max(currentIndex() - 1, 0)); }
-
-                // Botones
-                $next.addEventListener('click', next);
-                $prev.addEventListener('click', prev);
-
-                // Teclado
-                $track.addEventListener('keydown', (e) => {
-                    if (e.key === 'ArrowRight') next();
-                    if (e.key === 'ArrowLeft') prev();
-                });
-
-                // Sincroniza bullets al hacer swipe/scroll
-                let raf = null;
-                $track.addEventListener('scroll', () => {
-                    if (raf) cancelAnimationFrame(raf);
-                    raf = requestAnimationFrame(() => updateARIA(currentIndex()));
-                });
-
-                // Recalcular en resize
-                new ResizeObserver(() => goTo(currentIndex())).observe($track);
-
-                // Init
-                updateARIA(0);
-            })();
-        </script>
 
         <!-- Scripts necesarios (colócalos al final de tu <body>) -->
 <script src="https://cdn.jsdelivr.net/npm/lite-youtube-embed@0.3.0/src/lite-yt-embed.js"></script>
