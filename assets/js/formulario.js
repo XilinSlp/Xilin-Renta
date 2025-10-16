@@ -1,19 +1,19 @@
 (() => {
-  const SITE_KEY  = '6LetH4sqAAAAADUkfe67jIEvLkRU0qcvaU2Vhe81'; // pública (ok en cliente)
+  const SITE_KEY  = '6LetH4sqAAAAADUkfe67jIEvLkRU0qcvaU2Vhe81'; // pública
   const FORM_ID   = 'mc-embedded-subscribe-form';
   const BTN_ID    = 'mc-embedded-subscribe';
   const STATUS_ID = 'form-status';
-  const THANK_YOU_URL = '/gracias-renta-montacarga';
-  const MC_IFRAME_NAME = 'mc-submit-bridge'; // Mailchimp en iframe oculto
+  const THANK_YOU_URL = 'https://www.xilinslp.com.mx/gracias-renta-montacarga';
+  const MC_IFRAME_NAME = 'mc-submit-bridge'; // Mailchimp via iframe oculto
 
-  const $   = (id) => document.getElementById(id);
-  const val = (id) => ($(id)?.value || '').trim();
+  const $ = id => document.getElementById(id);
+  const val = id => ($(id)?.value || '').trim();
   const REQUIRED = [
     'mce-FNAME','mce-EMAIL','mce-PHONE','mce-SELECSTADO','mce-REQUIERE',
     'mce-EQUIPO','mce-ASESORIA','mce-TIPO','mce-ADITAMIENT','mce-MENSAJE','mce-PUESTOEMP'
   ];
 
-  // ---------- estilos / status ----------
+  // --- estilos del spinner / status ---
   function injectStyles(){
     if (document.getElementById('leadform-styles')) return;
     const s = document.createElement('style');
@@ -27,7 +27,7 @@
         conic-gradient(var(--c1),var(--c1)) border-box;
         -webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 3px),#000 0) content-box,none;
         mask:radial-gradient(farthest-side,transparent calc(100% - 3px),#000 0) content-box,none;
-        padding:3px;animation:lf-rotate 1s linear infinite;}
+        padding:3px;animation:lf-rotate 1s linear infinite}
       .lf-btnring{width:24px;height:24px}
       @keyframes lf-rotate{to{transform:rotate(360deg)}}
       .lf-ok,.lf-x{display:inline-flex;align-items:center;justify-content:center}
@@ -40,9 +40,12 @@
   function ensureStatusEl(){
     injectStyles();
     let el = $(STATUS_ID);
-    if(!el){
-      el=document.createElement('div'); el.id=STATUS_ID; el.setAttribute('aria-live','polite');
-      el.className='lf-row lf-hidden'; el.innerHTML=`<span></span><span></span>`;
+    if (!el) {
+      el = document.createElement('div');
+      el.id = STATUS_ID;
+      el.setAttribute('aria-live','polite');
+      el.className = 'lf-row lf-hidden';
+      el.innerHTML = `<span></span><span></span>`;
       $(FORM_ID)?.appendChild(el);
     }
     return el;
@@ -61,7 +64,7 @@
     text.textContent=msg||'';
   }
 
-  // ---------- validación ----------
+  // --- validación ---
   function markField(id,ok){const el=$(id); if(!el) return;
     el.style.borderWidth='1px'; el.style.borderStyle='solid';
     el.style.transition='border-color .3s, box-shadow .3s';
@@ -78,7 +81,7 @@
   function enableLiveValidation(){REQUIRED.forEach(id=>{const el=$(id); if(!el) return;
     ['input','change','blur'].forEach(evt=>el.addEventListener(evt,()=>checkField(id)));});}
 
-  // ---------- Mailchimp bridge ----------
+  // --- Mailchimp bridge ---
   function ensureMcIframe(){
     let iframe=document.querySelector(`iframe[name="${MC_IFRAME_NAME}"]`);
     if(!iframe){iframe=document.createElement('iframe'); iframe.name=MC_IFRAME_NAME; document.body.appendChild(iframe);}
@@ -90,7 +93,7 @@
     finally{originalTarget?form.setAttribute('target',originalTarget):form.removeAttribute('target');}
   }
 
-  // ---------- botón ----------
+  // --- botón ---
   function showButtonLoading(btn){injectStyles(); btn.disabled=true; btn.innerHTML=`<span class="lf-btnring" aria-hidden="true"></span>`;}
   function showButtonSuccess(btn){btn.innerHTML=`<span class="lf-ok lf-success" aria-hidden="true">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
@@ -101,19 +104,22 @@
     <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg></span>`;
     setTimeout(()=>{btn.disabled=false; btn.textContent='Suscribirme';},1200);}
 
-  // ---------- envío ----------
+  // --- envío ---
   let isSubmitting=false;
   function handleSubmit(ev){
     ev.preventDefault();
     if(isSubmitting) return;
     const btn=$(BTN_ID), form=$(FORM_ID);
-    if(!validateFields()){alert('Por favor revisa los campos marcados en rojo.');
-      setStatus('Hay errores en el formulario.','error'); showButtonError(btn); return;}
+
+    if(!validateFields()){
+      alert('Por favor revisa los campos marcados en rojo.');
+      setStatus('Hay errores en el formulario.','error'); showButtonError(btn); return;
+    }
 
     isSubmitting=true; showButtonLoading(btn); setStatus('Enviando datos…','loading');
 
     const sendBoth=(token)=>{
-      // payload para la Function (NO expone secretos)
+      // Payload para la Function (la Function lee secretos y reenvía a Apps Script)
       const params = new URLSearchParams({
         FNAME: val('mce-FNAME'), EMAIL: val('mce-EMAIL'), PHONE: val('mce-PHONE'),
         SELECSTADO: val('mce-SELECSTADO'), PUESTOEMP: val('mce-PUESTOEMP'),
@@ -123,14 +129,14 @@
         recaptcha_token: token
       });
 
-      // 1) Enviar a Netlify Function (procesa reCAPTCHA + reenvía a Apps Script)
+      // 1) Netlify Function (verifica captcha + reenvía a Google Apps Script)
       fetch('/api/submit', {
         method:'POST',
         headers:{'Content-Type':'application/x-www-form-urlencoded'},
         body: params.toString()
       }).catch(err=>console.error('[LeadForm] Function error:',err));
 
-      // 2) Enviar a Mailchimp en iframe (action HTML original)
+      // 2) Mailchimp (action HTML) en iframe
       submitToMailchimp(form);
 
       // UX local
