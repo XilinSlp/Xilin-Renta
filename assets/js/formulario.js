@@ -16,7 +16,7 @@
     'mce-EQUIPO','mce-ASESORIA','mce-TIPO','mce-ADITAMIENT','mce-MENSAJE','mce-PUESTOEMP'
   ];
 
-  // ---------- Estilos del spinner ----------
+  // --------- Estilos del spinner ---------
   function injectStyles(){
     if (document.getElementById('leadform-styles')) return;
     const style = document.createElement('style');
