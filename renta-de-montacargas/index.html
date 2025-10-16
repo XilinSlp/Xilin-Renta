@@ -6,6 +6,10 @@
     <!-- Google Recaptcha -->
     <script src="https://www.google.com/recaptcha/api.js?render=6LetH4sqAAAAADUkfe67jIEvLkRU0qcvaU2Vhe81"></script>
 
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fjalla+One&display=swap" rel="stylesheet">
+
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
 
@@ -25,10 +29,11 @@
 
         <!-- Extra CSS opcional para afinado fino en hover/bordes -->
         <style>
-            textarea, input, select, button {
-                border: white 1px solid;
+            body {
+                font-family: "Fjalla One", sans-serif;
+                font-weight: 400;
+                font-style: normal;
             }
-
 
             /* Glow más notorio al pasar el mouse por las imágenes */
             .glow-red:hover {
@@ -829,12 +834,23 @@
 </footer>
 
 <div id="mc_embed_shell">
-    <div id="mc_embed_signup">
+    <div id="mc_embed_signup" 
+    class="bg-[#232323] py-4 sm:py-10 px-4 sm:px-10">
+
+        <h2 class="text-center font-extrabold uppercase tracking-wide text-2xl sm:text-3xl">
+            <span>¿ESTÁS INTERESADO EN <br>ALGUNO</span>
+            <span class="text-[#C93127]">DE NUESTROS EQUIPOS?</span>
+        </h2>
+    
+        <div class="my-4 flex justify-center">
+        <div class="h-[8px] w-full max-w-[400px] bg-gradient-to-r from-[#1c1c1c] via-[#7a1813] to-[#d33b2f]"></div>
+        </div>
+
         <form action="https://xilinslp.us14.list-manage.com/subscribe/post?u=c94b27e74f56092fcbb938573&amp;id=7e912b06e1&amp;f_id=00059ce1f0" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate" target="_self" novalidate="">
             <div id="mc_embed_signup_scroll">
                 <div class="indicates-required"><span class="asterisk">*</span> indica que es obligatorio</div>
                 
-                <div class="mc-field-group"><label for="mce-FNAME">Nombre<span class="asterisk">*</span></label><input type="text" name="FNAME" class="required text" id="mce-FNAME" required="" value=""></div>
+                <div class="mc-field-group completo"><label for="mce-FNAME">Nombre<span class="asterisk">*</span></label><input type="text" name="FNAME" class="required text" id="mce-FNAME" required="" value=""></div>
                 
                 <div class="mc-field-group"><label for="mce-EMAIL">Dirección de correo electrónico <span class="asterisk">*</span></label><input type="email" name="EMAIL" class="required email" id="mce-EMAIL" required="" value="">
                 </div>
@@ -860,10 +876,11 @@
                 <div class="mc-field-group"><label for="mce-TIPO">Tipo de negocio <span class="asterisk">*</span></label><input type="text" name="TIPO" class="required text" id="mce-TIPO" required="" value="">
                 </div>
                 
-                <div class="mc-field-group"><label for="mce-ADITAMIENT">Se requiere algún aditamento adicional, indicar que tipo <span class="asterisk">*</span></label><select name="ADITAMIENT" class="required" id="mce-ADITAMIENT"><option value=""></option><option value="Desplazador">Desplazador</option><option value="Push Pull">Push Pull</option><option value="Doble Pallet">Doble Pallet</option><option value="Paper Roll Clamp">Paper Roll Clamp</option><option value="Clamp">Clamp</option></select>
+                <div class="mc-field-group alto"><label for="mce-ADITAMIENT">Se requiere algún aditamento adicional, indicar que tipo <span class="asterisk">*</span></label><select name="ADITAMIENT" class="required" id="mce-ADITAMIENT"><option value=""></option><option value="Desplazador">Desplazador</option><option value="Push Pull">Push Pull</option><option value="Doble Pallet">Doble Pallet</option><option value="Paper Roll Clamp">Paper Roll Clamp</option><option value="Clamp">Clamp</option></select>
                 </div>
                 
-                <div class="mc-field-group"><label for="mce-MENSAJE">Mensaje <span class="asterisk">*</span></label><input type="text" name="MENSAJE" class="required text" id="mce-MENSAJE" required="" value="">
+                <div class="mc-field-group alto"><label for="mce-MENSAJE">Mensaje <span class="asterisk">*</span></label>
+                    <textarea type="text" name="MENSAJE" class="required text" id="mce-MENSAJE" required="" value=""></textarea>
                 </div>
 
                 <div hidden=""><input type="hidden" name="tags" value="7325519">

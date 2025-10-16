@@ -4,7 +4,13 @@
 <head>
     <!-- Google Recaptcha -->
     <script src="https://www.google.com/recaptcha/api.js"></script>
+
     
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fjalla+One&display=swap" rel="stylesheet">
+
+
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
 
@@ -20,6 +26,13 @@
     <link rel="apple-touch-icon" sizes="180x180" href="/assets/iconos/apple-touch-icon.png?v=2">
 
     <style>
+      body {
+        font-family: "Fjalla One", sans-serif;
+        font-weight: 400;
+        font-style: normal;
+      }
+
+
         @keyframes ringPulse {
             0%   { transform: scale(1);    opacity: .7; box-shadow: 0 0 0 0 rgba(201,49,39,.45); }
             60%  { transform: scale(1.35); opacity: 0;  box-shadow: 0 0 0 12px rgba(201,49,39,0); }
