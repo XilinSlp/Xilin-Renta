@@ -1,4 +1,3 @@
-// formulario.js
 (() => {
   const SITE_KEY = '6LetH4sqAAAAADUkfe67jIEvLkRU0qcvaU2Vhe81';
   const FORM_ID  = 'mc-embedded-subscribe-form';
@@ -6,19 +5,13 @@
   const STATUS_ID = 'form-status';
 
   const $  = (id) => document.getElementById(id);
-  const val = (id) => ( $(id)?.value || '' ).trim();
+  const val = (id) => ($(id)?.value || '').trim();
   const LOG = (...a) => console.log('[LeadForm]', ...a);
 
   const REQUIRED = [
     'mce-FNAME','mce-EMAIL','mce-PHONE','mce-SELECSTADO','mce-REQUIERE',
     'mce-EQUIPO','mce-ASESORIA','mce-TIPO','mce-ADITAMIENT','mce-MENSAJE','mce-PUESTOEMP'
   ];
-
-  function validateRequired(){
-    const ok = REQUIRED.every(id => val(id));
-    if (!ok) LOG('Validación: faltan campos requeridos');
-    return ok;
-  }
 
   // crea / obtiene el contenedor de estado
   function ensureStatusEl(){
@@ -28,7 +21,6 @@
       el.id = STATUS_ID;
       el.setAttribute('aria-live', 'polite');
       el.className = 'mt-3 text-sm';
-      // lo insertamos justo después del botón si existe, o al final del form
       const btn = $(BTN_ID);
       if (btn?.parentElement) btn.parentElement.appendChild(el);
       else $(FORM_ID)?.appendChild(el);
@@ -69,7 +61,6 @@
       originalBtnText = btn.value || btn.textContent;
       btn.disabled = true;
       btn.classList.add('opacity-60','cursor-not-allowed');
-      // texto + spinner
       const wrap = document.createElement('span');
       wrap.className = 'inline-flex items-center';
       wrap.appendChild(makeSpinner());
@@ -86,17 +77,70 @@
     }
   }
 
+  // ---------------------------
+  // 🔥 Validación visual avanzada
+  // ---------------------------
+  function markField(id, isValid) {
+    const el = $(id);
+    if (!el) return;
+
+    el.style.borderWidth = '1px';
+    el.style.borderStyle = 'solid';
+
+    if (isValid === false) {
+      el.style.borderColor = '#ef4444'; // rojo (Tailwind red-500)
+      el.style.boxShadow = '0 0 4px #ef4444';
+    } else if (isValid === true) {
+      el.style.borderColor = '#22c55e'; // verde (Tailwind green-500)
+      el.style.boxShadow = '0 0 4px #22c55e';
+    } else {
+      el.style.borderColor = '';
+      el.style.boxShadow = '';
+    }
+  }
+
+  function validateFields() {
+    let allValid = true;
+
+    REQUIRED.forEach(id => {
+      const el = $(id);
+      if (!el) return;
+      const value = val(id);
+      let isValid = true;
+
+      if (!value) {
+        isValid = false;
+      } else {
+        if (el.type === 'email') {
+          isValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+        } else if (id === 'mce-PHONE') {
+          isValid = /^[0-9]{7,15}$/.test(value.replace(/\s+/g, ''));
+        }
+      }
+
+      markField(id, isValid);
+      if (!isValid) allValid = false;
+    });
+
+    return allValid;
+  }
+
+  // ---------------------------
+  // Envío principal
+  // ---------------------------
   async function handleSubmit(e){
     e.preventDefault();
     LOG('Submit iniciado');
 
-    if (!validateRequired()){
-      setStatus('Completa los campos requeridos.', 'error');
+    if (!validateFields()) {
+      alert('Por favor revisa los campos marcados en rojo.');
+      setStatus('Hay errores en el formulario.', 'error');
       return;
     }
 
     setLoading(true);
     setStatus('Preparando verificación…');
+
     try {
       if (typeof grecaptcha === 'undefined') {
         throw new Error('reCAPTCHA no cargó');
@@ -109,7 +153,6 @@
 
         setStatus('Verificando seguridad…');
 
-        // Construimos payload (no logeamos datos sensibles)
         const params = new URLSearchParams({
           FNAME: val('mce-FNAME'),
           EMAIL: val('mce-EMAIL'),
@@ -123,13 +166,6 @@
           ADITAMIENT: val('mce-ADITAMIENT'),
           MENSAJE: val('mce-MENSAJE'),
           recaptcha_token: token
-        });
-
-        LOG('Payload listo (campos presentes):', {
-          FNAME: !!val('mce-FNAME'),
-          EMAIL: !!val('mce-EMAIL'),
-          PHONE: !!val('mce-PHONE'),
-          // …resto omitidos por privacidad
         });
 
         setStatus('Enviando datos…');
@@ -164,6 +200,7 @@
     }
   }
 
+  // Montaje
   function mount(){
     const form = $(FORM_ID);
     if (!form) { LOG('Form no encontrado:', FORM_ID); return; }
