@@ -4,16 +4,17 @@
   const BTN_ID    = 'mc-embedded-subscribe';
   const STATUS_ID = 'form-status';
   const THANK_YOU_URL = 'https://renta-xilin.netlify.app/gracias-renta-montacarga';
-  const MC_IFRAME_NAME = 'mc-submit-bridge'; // Mailchimp via iframe oculto
+  const MC_IFRAME_NAME = 'mc-submit-bridge';
 
   const $ = id => document.getElementById(id);
   const val = id => ($(id)?.value || '').trim();
+
   const REQUIRED = [
     'mce-FNAME','mce-EMAIL','mce-PHONE','mce-SELECSTADO','mce-REQUIERE',
     'mce-EQUIPO','mce-ASESORIA','mce-TIPO','mce-ADITAMIENT','mce-MENSAJE','mce-PUESTOEMP'
   ];
 
-  // --- estilos del spinner / status ---
+  // ---------- estilos / status ----------
   function injectStyles(){
     if (document.getElementById('leadform-styles')) return;
     const s = document.createElement('style');
@@ -64,7 +65,7 @@
     text.textContent=msg||'';
   }
 
-  // --- validación ---
+  // ---------- validación ----------
   function markField(id,ok){const el=$(id); if(!el) return;
     el.style.borderWidth='1px'; el.style.borderStyle='solid';
     el.style.transition='border-color .3s, box-shadow .3s';
@@ -77,11 +78,17 @@
     if(ok && id==='mce-PHONE') ok=/^[0-9]{7,15}$/.test(v.replace(/\s+/g,''));
     markField(id,ok); return ok;
   }
-  function validateFields(){let all=true; REQUIRED.forEach(id=>{if(!checkField(id)) all=false;}); return all;}
-  function enableLiveValidation(){REQUIRED.forEach(id=>{const el=$(id); if(!el) return;
-    ['input','change','blur'].forEach(evt=>el.addEventListener(evt,()=>checkField(id)));});}
+  function validateFields(){
+    let all=true; REQUIRED.forEach(id=>{ if(!checkField(id)) all=false; });
+    console.log('[LeadForm] validate ->', all?'OK':'ERRORES');
+    return all;
+  }
+  function enableLiveValidation(){REQUIRED.forEach(id=>{
+    const el=$(id); if(!el) return;
+    ['input','change','blur'].forEach(evt=>el.addEventListener(evt,()=>checkField(id)));
+  });}
 
-  // --- Mailchimp bridge ---
+  // ---------- Mailchimp bridge (no saca al usuario) ----------
   function ensureMcIframe(){
     let iframe=document.querySelector(`iframe[name="${MC_IFRAME_NAME}"]`);
     if(!iframe){iframe=document.createElement('iframe'); iframe.name=MC_IFRAME_NAME; document.body.appendChild(iframe);}
@@ -93,7 +100,7 @@
     finally{originalTarget?form.setAttribute('target',originalTarget):form.removeAttribute('target');}
   }
 
-  // --- botón ---
+  // ---------- botón ----------
   function showButtonLoading(btn){injectStyles(); btn.disabled=true; btn.innerHTML=`<span class="lf-btnring" aria-hidden="true"></span>`;}
   function showButtonSuccess(btn){btn.innerHTML=`<span class="lf-ok lf-success" aria-hidden="true">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
@@ -104,7 +111,7 @@
     <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg></span>`;
     setTimeout(()=>{btn.disabled=false; btn.textContent='Suscribirme';},1200);}
 
-  // --- envío ---
+  // ---------- envío ----------
   let isSubmitting=false;
   function handleSubmit(ev){
     ev.preventDefault();
@@ -119,7 +126,7 @@
     isSubmitting=true; showButtonLoading(btn); setStatus('Enviando datos…','loading');
 
     const sendBoth=(token)=>{
-      // Payload para la Function (la Function lee secretos y reenvía a Apps Script)
+      // Payload para la Function (se Reenvía a Apps Script con los mismos nombres)
       const params = new URLSearchParams({
         FNAME: val('mce-FNAME'), EMAIL: val('mce-EMAIL'), PHONE: val('mce-PHONE'),
         SELECSTADO: val('mce-SELECSTADO'), PUESTOEMP: val('mce-PUESTOEMP'),
@@ -128,6 +135,7 @@
         ADITAMIENT: val('mce-ADITAMIENT'), MENSAJE: val('mce-MENSAJE'),
         recaptcha_token: token
       });
+      console.log('[LeadForm] payload ->', Object.fromEntries(params));
 
       // 1) Netlify Function (verifica captcha + reenvía a Google Apps Script)
       fetch('/api/submit', {
@@ -136,7 +144,7 @@
         body: params.toString()
       }).catch(err=>console.error('[LeadForm] Function error:',err));
 
-      // 2) Mailchimp (action HTML) en iframe
+      // 2) Mailchimp (action) en iframe
       submitToMailchimp(form);
 
       // UX local
@@ -158,6 +166,7 @@
     const form=$(FORM_ID); if(!form) return;
     ensureStatusEl(); ensureMcIframe();
     form.addEventListener('submit',handleSubmit); enableLiveValidation();
+    console.log('[LeadForm] listo');
   }
 
   document.readyState==='loading'?document.addEventListener('DOMContentLoaded',mount):mount();
