@@ -3,7 +3,7 @@
   const FORM_ID   = 'mc-embedded-subscribe-form';
   const BTN_ID    = 'mc-embedded-subscribe';
   const STATUS_ID = 'form-status';
-  const THANK_YOU_URL = 'https://www.xilinslp.com.mx/gracias-renta-montacarga';
+  const THANK_YOU_URL = 'https://renta-xilin.netlify.app/gracias-renta-montacarga';
   const MC_IFRAME_NAME = 'mc-submit-bridge'; // Mailchimp via iframe oculto
 
   const $ = id => document.getElementById(id);
