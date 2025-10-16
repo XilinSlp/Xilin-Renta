@@ -78,7 +78,7 @@
   }
 
   // ---------------------------
-  // 🔥 Validación visual avanzada
+  // 🔥 Validación visual avanzada con actualización en vivo
   // ---------------------------
   function markField(id, isValid) {
     const el = $(id);
@@ -86,12 +86,13 @@
 
     el.style.borderWidth = '1px';
     el.style.borderStyle = 'solid';
+    el.style.transition = 'border-color 0.3s ease, box-shadow 0.3s ease';
 
     if (isValid === false) {
-      el.style.borderColor = '#ef4444'; // rojo (Tailwind red-500)
+      el.style.borderColor = '#ef4444'; // rojo
       el.style.boxShadow = '0 0 4px #ef4444';
     } else if (isValid === true) {
-      el.style.borderColor = '#22c55e'; // verde (Tailwind green-500)
+      el.style.borderColor = '#22c55e'; // verde
       el.style.boxShadow = '0 0 4px #22c55e';
     } else {
       el.style.borderColor = '';
@@ -99,30 +100,44 @@
     }
   }
 
+  function checkField(id) {
+    const el = $(id);
+    if (!el) return true;
+    const value = val(id);
+    let isValid = true;
+
+    if (!value) {
+      isValid = false;
+    } else {
+      if (el.type === 'email') {
+        isValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+      } else if (id === 'mce-PHONE') {
+        isValid = /^[0-9]{7,15}$/.test(value.replace(/\s+/g, ''));
+      }
+    }
+
+    markField(id, isValid);
+    return isValid;
+  }
+
   function validateFields() {
     let allValid = true;
+    REQUIRED.forEach(id => {
+      const valid = checkField(id);
+      if (!valid) allValid = false;
+    });
+    return allValid;
+  }
 
+  // 👇 Validación en tiempo real
+  function enableLiveValidation() {
     REQUIRED.forEach(id => {
       const el = $(id);
       if (!el) return;
-      const value = val(id);
-      let isValid = true;
-
-      if (!value) {
-        isValid = false;
-      } else {
-        if (el.type === 'email') {
-          isValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
-        } else if (id === 'mce-PHONE') {
-          isValid = /^[0-9]{7,15}$/.test(value.replace(/\s+/g, ''));
-        }
-      }
-
-      markField(id, isValid);
-      if (!isValid) allValid = false;
+      ['input', 'change', 'blur'].forEach(evt => {
+        el.addEventListener(evt, () => checkField(id));
+      });
     });
-
-    return allValid;
   }
 
   // ---------------------------
@@ -205,6 +220,7 @@
     const form = $(FORM_ID);
     if (!form) { LOG('Form no encontrado:', FORM_ID); return; }
     form.addEventListener('submit', handleSubmit);
+    enableLiveValidation();
     LOG('Listener de submit montado');
   }
 
