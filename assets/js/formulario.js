@@ -4,7 +4,7 @@
   const BTN_ID   = 'mc-embedded-subscribe';
   const STATUS_ID = 'form-status';
 
-  const $  = (id) => document.getElementById(id);
+  const $ = (id) => document.getElementById(id);
   const val = (id) => ($(id)?.value || '').trim();
   const LOG = (...a) => console.log('[LeadForm]', ...a);
 
@@ -13,86 +13,43 @@
     'mce-EQUIPO','mce-ASESORIA','mce-TIPO','mce-ADITAMIENT','mce-MENSAJE','mce-PUESTOEMP'
   ];
 
-  // crea / obtiene el contenedor de estado
+  // Contenedor de estado
   function ensureStatusEl(){
     let el = $(STATUS_ID);
     if (!el) {
       el = document.createElement('div');
       el.id = STATUS_ID;
       el.setAttribute('aria-live', 'polite');
-      el.className = 'mt-3 text-sm';
-      const btn = $(BTN_ID);
-      if (btn?.parentElement) btn.parentElement.appendChild(el);
-      else $(FORM_ID)?.appendChild(el);
+      el.className = 'mt-3 text-sm text-white/80';
+      $(FORM_ID)?.appendChild(el);
     }
     return el;
   }
 
   function setStatus(message, type='info'){
     const el = ensureStatusEl();
-    const base = 'mt-3 text-sm';
     const color =
       type === 'success' ? 'text-green-400' :
       type === 'error'   ? 'text-red-400'   :
                            'text-white/80';
-    el.className = `${base} ${color}`;
+    el.className = `mt-3 text-sm ${color}`;
     el.textContent = message;
   }
 
-  // Spinner inline para el botón
-  function makeSpinner(){
-    const span = document.createElement('span');
-    span.className = 'inline-block h-4 w-4 mr-2 align-[-2px] animate-spin';
-    span.innerHTML = `
-      <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none">
-        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-        <path class="opacity-90" fill="currentColor" d="M4 12a8 8 0 018-8v4A4 4 0 008 12H4z"></path>
-      </svg>`;
-    return span;
-  }
-
-  let originalBtnText = null;
-  function setLoading(loading){
-    const form = $(FORM_ID);
-    const btn  = $(BTN_ID);
-    if (!form || !btn) return;
-
-    if (loading) {
-      originalBtnText = btn.value || btn.textContent;
-      btn.disabled = true;
-      btn.classList.add('opacity-60','cursor-not-allowed');
-      const wrap = document.createElement('span');
-      wrap.className = 'inline-flex items-center';
-      wrap.appendChild(makeSpinner());
-      wrap.appendChild(document.createTextNode(' Enviando…'));
-      if (btn.tagName === 'INPUT') btn.value = 'Enviando…';
-      else { btn.textContent = ''; btn.appendChild(wrap); }
-      form.setAttribute('aria-busy', 'true');
-    } else {
-      btn.disabled = false;
-      btn.classList.remove('opacity-60','cursor-not-allowed');
-      if (btn.tagName === 'INPUT') btn.value = originalBtnText || 'Enviar';
-      else btn.textContent = originalBtnText || 'Enviar';
-      form.removeAttribute('aria-busy');
-    }
-  }
-
   // ---------------------------
-  // 🔥 Validación visual avanzada con actualización en vivo
+  // 🔥 Validación visual
   // ---------------------------
   function markField(id, isValid) {
     const el = $(id);
     if (!el) return;
-
     el.style.borderWidth = '1px';
     el.style.borderStyle = 'solid';
     el.style.transition = 'border-color 0.3s ease, box-shadow 0.3s ease';
-
     if (isValid === false) {
-      el.style.borderColor = '#ef4444'; // rojo
+      el.style.borderColor = '#ef4444';
       el.style.boxShadow = '0 0 4px #ef4444';
     } else if (isValid === true) {
-      el.style.borderColor = '#22c55e'; // verde
+      el.style.borderColor = '#22c55e';
       el.style.boxShadow = '0 0 4px #22c55e';
     } else {
       el.style.borderColor = '';
@@ -105,17 +62,11 @@
     if (!el) return true;
     const value = val(id);
     let isValid = true;
-
-    if (!value) {
-      isValid = false;
-    } else {
-      if (el.type === 'email') {
-        isValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
-      } else if (id === 'mce-PHONE') {
-        isValid = /^[0-9]{7,15}$/.test(value.replace(/\s+/g, ''));
-      }
-    }
-
+    if (!value) isValid = false;
+    else if (el.type === 'email')
+      isValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+    else if (id === 'mce-PHONE')
+      isValid = /^[0-9]{7,15}$/.test(value.replace(/\s+/g, ''));
     markField(id, isValid);
     return isValid;
   }
@@ -123,13 +74,11 @@
   function validateFields() {
     let allValid = true;
     REQUIRED.forEach(id => {
-      const valid = checkField(id);
-      if (!valid) allValid = false;
+      if (!checkField(id)) allValid = false;
     });
     return allValid;
   }
 
-  // 👇 Validación en tiempo real
   function enableLiveValidation() {
     REQUIRED.forEach(id => {
       const el = $(id);
@@ -141,32 +90,77 @@
   }
 
   // ---------------------------
+  // Animación circular del botón
+  // ---------------------------
+  function showButtonLoading(btn) {
+    btn.disabled = true;
+    btn.classList.add('relative', 'cursor-not-allowed', 'opacity-80');
+
+    // Elimina texto y pone spinner circular SVG
+    btn.innerHTML = `
+      <span class="absolute inset-0 flex items-center justify-center">
+        <svg class="animate-spin h-6 w-6 text-white" viewBox="0 0 50 50">
+          <circle class="opacity-20" cx="25" cy="25" r="20" stroke="currentColor" stroke-width="5" fill="none"></circle>
+          <circle class="opacity-80" cx="25" cy="25" r="20" stroke="currentColor" stroke-width="5" fill="none"
+            stroke-linecap="round" stroke-dasharray="80" stroke-dashoffset="60"></circle>
+        </svg>
+      </span>
+    `;
+  }
+
+  function showButtonSuccess(btn) {
+    btn.innerHTML = `
+      <span class="absolute inset-0 flex items-center justify-center text-green-400 transition-transform scale-110">
+        <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+        </svg>
+      </span>
+    `;
+    setTimeout(() => {
+      btn.disabled = false;
+      btn.classList.remove('cursor-not-allowed', 'opacity-80');
+      btn.innerHTML = 'Suscribirme';
+    }, 1500);
+  }
+
+  function showButtonError(btn) {
+    btn.innerHTML = `
+      <span class="absolute inset-0 flex items-center justify-center text-red-400 transition-transform scale-110">
+        <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </span>
+    `;
+    setTimeout(() => {
+      btn.disabled = false;
+      btn.classList.remove('cursor-not-allowed', 'opacity-80');
+      btn.innerHTML = 'Suscribirme';
+    }, 1500);
+  }
+
+  // ---------------------------
   // Envío principal
   // ---------------------------
   async function handleSubmit(e){
     e.preventDefault();
-    LOG('Submit iniciado');
+    const btn = $(BTN_ID);
+    const form = $(FORM_ID);
 
     if (!validateFields()) {
       alert('Por favor revisa los campos marcados en rojo.');
       setStatus('Hay errores en el formulario.', 'error');
+      showButtonError(btn);
       return;
     }
 
-    setLoading(true);
-    setStatus('Preparando verificación…');
+    showButtonLoading(btn);
+    setStatus('Enviando datos…');
 
     try {
-      if (typeof grecaptcha === 'undefined') {
-        throw new Error('reCAPTCHA no cargó');
-      }
+      if (typeof grecaptcha === 'undefined') throw new Error('reCAPTCHA no cargó');
 
-      LOG('Solicitando token reCAPTCHA…');
       await grecaptcha.ready(async () => {
         const token = await grecaptcha.execute(SITE_KEY, { action: 'submit' });
-        LOG('Token reCAPTCHA obtenido');
-
-        setStatus('Verificando seguridad…');
 
         const params = new URLSearchParams({
           FNAME: val('mce-FNAME'),
@@ -183,45 +177,36 @@
           recaptcha_token: token
         });
 
-        setStatus('Enviando datos…');
-        LOG('Llamando /api/submit …');
-
         const res = await fetch('/api/submit', {
           method: 'POST',
           headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
           body: params
         });
 
-        LOG('Respuesta backend:', res.status, res.statusText);
-
-        if (!res.ok) {
-          const txt = await res.text();
-          LOG('Error backend:', txt);
-          setStatus('No pudimos enviar tu solicitud. Intenta de nuevo.', 'error');
-          setLoading(false);
-          return;
-        }
+        if (!res.ok) throw new Error('Error al enviar');
 
         setStatus('¡Enviado correctamente! Redirigiendo…', 'success');
-        LOG('OK → redirigiendo a página de gracias');
+        showButtonSuccess(btn);
         setTimeout(() => {
           window.location.href = 'https://www.xilinslp.com.mx/gracias-renta-montacarga';
-        }, 400);
+        }, 700);
       });
     } catch (err) {
-      LOG('Excepción durante el envío:', err);
-      setStatus('Ocurrió un problema. Intenta de nuevo.', 'error');
-      setLoading(false);
+      console.error(err);
+      setStatus('Error al enviar. Intenta de nuevo.', 'error');
+      showButtonError(btn);
     }
   }
 
+  // ---------------------------
   // Montaje
+  // ---------------------------
   function mount(){
     const form = $(FORM_ID);
     if (!form) { LOG('Form no encontrado:', FORM_ID); return; }
     form.addEventListener('submit', handleSubmit);
     enableLiveValidation();
-    LOG('Listener de submit montado');
+    LOG('Formulario listo con validación y spinner circular');
   }
 
   if (document.readyState === 'loading') {
