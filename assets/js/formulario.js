@@ -1,10 +1,10 @@
 (() => {
-  const SITE_KEY = '6LetH4sqAAAAADUkfe67jIEvLkRU0qcvaU2Vhe81';
-  const FORM_ID  = 'mc-embedded-subscribe-form';
-  const BTN_ID   = 'mc-embedded-subscribe';
+  const SITE_KEY  = '6LetH4sqAAAAADUkfe67jIEvLkRU0qcvaU2Vhe81';
+  const FORM_ID   = 'mc-embedded-subscribe-form';
+  const BTN_ID    = 'mc-embedded-subscribe';
   const STATUS_ID = 'form-status';
 
-  const $ = (id) => document.getElementById(id);
+  const $   = (id) => document.getElementById(id);
   const val = (id) => ($(id)?.value || '').trim();
   const LOG = (...a) => console.log('[LeadForm]', ...a);
 
@@ -13,76 +13,52 @@
     'mce-EQUIPO','mce-ASESORIA','mce-TIPO','mce-ADITAMIENT','mce-MENSAJE','mce-PUESTOEMP'
   ];
 
-  // -------------------------------------------------
-  // 🔧 Estilos del indicador de estado (inyectados 1 vez)
-  // -------------------------------------------------
-  function ensureStatusStyles(){
-    if (document.getElementById('form-status-styles')) return;
-    const css = `
-    .fs-wrap{display:flex;align-items:center;gap:.5rem;margin-top:.75rem;font-size:.875rem}
-    .fs-ind{width:24px;height:24px;position:relative;display:inline-flex}
-    .fs-ind svg{width:100%;height:100%;transform-origin:50% 50%}
-    .fs-track{stroke:#D1D5DB;stroke-width:4;fill:none;opacity:.6}
-    .fs-spin{stroke:currentColor;stroke-width:4;fill:none;stroke-linecap:round;
-             stroke-dasharray:126;stroke-dashoffset:90}
-    .fs-check,.fs-cross{fill:none;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;
-                        stroke-dasharray:60;stroke-dashoffset:60;opacity:0}
-    /* Estados */
-    #${STATUS_ID}[data-state="idle"] .fs-spin{display:none}
-    #${STATUS_ID}[data-state="idle"] .fs-check,
-    #${STATUS_ID}[data-state="idle"] .fs-cross{display:none}
-    #${STATUS_ID}[data-state="loading"] .fs-spin{animation:fs-rotate 1s linear infinite,
-                                                 fs-dash 1.4s ease-in-out infinite}
-    #${STATUS_ID}[data-state="success"]{color:#34D399}
-    #${STATUS_ID}[data-state="success"] .fs-spin{display:none}
-    #${STATUS_ID}[data-state="success"] .fs-check{stroke:currentColor;opacity:1;
-      animation:fs-draw .6s ease forwards}
-    #${STATUS_ID}[data-state="error"]{color:#F87171}
-    #${STATUS_ID}[data-state="error"] .fs-spin{display:none}
-    #${STATUS_ID}[data-state="error"] .fs-cross{stroke:currentColor;opacity:1;
-      animation:fs-draw .6s ease forwards}
-    /* Animaciones */
-    @keyframes fs-rotate{to{transform:rotate(360deg)}}
-    @keyframes fs-dash{
-      0%{stroke-dasharray:1,126;stroke-dashoffset:0}
-      50%{stroke-dasharray:90,126;stroke-dashoffset:-35}
-      100%{stroke-dasharray:1,126;stroke-dashoffset:-125}
-    }
-    @keyframes fs-draw{to{stroke-dashoffset:0}}
-    `;
+  // ---------------------------
+  // Estilos del spinner (status + botón)
+  // ---------------------------
+  function ensureSpinnerStyles(){
+    if (document.getElementById('leadform-spinner-styles')) return;
     const style = document.createElement('style');
-    style.id = 'form-status-styles';
-    style.textContent = css;
+    style.id = 'leadform-spinner-styles';
+    style.textContent = `
+      .lf-row{display:flex;align-items:center;gap:.6rem;margin-top:.75rem;font-size:.875rem}
+      .lf-ring, .lf-btnring{
+        width:22px;height:22px;border-radius:50%;position:relative;display:inline-block;
+        --c1: #e5e7eb; --c2: currentColor;
+        background:
+          conic-gradient(from 0turn,var(--c2) 0.0turn 0.25turn, transparent 0.25turn) content-box,
+          conic-gradient(var(--c1), var(--c1)) border-box;
+        -webkit-mask:
+          radial-gradient(farthest-side,transparent calc(100% - 3px),#000 0) content-box,
+          none;
+        mask:
+          radial-gradient(farthest-side,transparent calc(100% - 3px),#000 0) content-box,
+          none;
+        padding:3px;
+        animation:lf-rotate 1s linear infinite;
+      }
+      .lf-btnring{width:24px;height:24px}
+      @keyframes lf-rotate{to{transform:rotate(360deg)}}
+      .lf-ok, .lf-x{display:inline-flex;align-items:center;justify-content:center}
+      .lf-ok svg, .lf-x svg{width:22px;height:22px}
+      .lf-success{color:#22c55e}
+      .lf-error{color:#ef4444}
+    `;
     document.head.appendChild(style);
   }
 
-  // -------------------------------------------------
-  // 🧩 Contenedor de estado con círculo animado
-  // -------------------------------------------------
+  // ---------------------------
+  // Contenedor de estado con círculo
+  // ---------------------------
   function ensureStatusEl(){
-    ensureStatusStyles();
+    ensureSpinnerStyles();
     let el = $(STATUS_ID);
     if (!el) {
       el = document.createElement('div');
       el.id = STATUS_ID;
-      el.setAttribute('role','status');
       el.setAttribute('aria-live','polite');
-      el.className = 'fs-wrap';
-      el.dataset.state = 'idle';
-      el.innerHTML = `
-        <span class="fs-ind" aria-hidden="true">
-          <svg viewBox="0 0 48 48">
-            <circle class="fs-track"   cx="24" cy="24" r="20"></circle>
-            <circle class="fs-spin"    cx="24" cy="24" r="20"></circle>
-            <polyline class="fs-check" points="14,26 21,33 34,18"></polyline>
-            <g class="fs-cross">
-              <line x1="16" y1="16" x2="32" y2="32"></line>
-              <line x1="32" y1="16" x2="16" y2="32"></line>
-            </g>
-          </svg>
-        </span>
-        <span class="fs-text">Listo.</span>
-      `;
+      el.className = 'lf-row';
+      el.innerHTML = `<span class="lf-ring" aria-hidden="true"></span><span>Listo.</span>`;
       $(FORM_ID)?.appendChild(el);
     }
     return el;
@@ -90,13 +66,34 @@
 
   function setStatus(message, type='info'){
     const el = ensureStatusEl();
-    // tipo → estado visual
-    let state = 'idle';
-    if (type === 'success') state = 'success';
-    else if (type === 'error') state = 'error';
-    else if (type === 'loading' || /enviando/i.test(message)) state = 'loading';
-    el.dataset.state = state;
-    el.querySelector('.fs-text').textContent = message;
+    const iconWrap = el.querySelector('span');
+    const textNode = el.querySelector('span + span');
+
+    // Reset
+    iconWrap.className = 'lf-ring';
+    el.classList.remove('lf-success','lf-error');
+
+    if (type === 'success') {
+      el.classList.add('lf-success');
+      iconWrap.className = 'lf-ok';
+      iconWrap.innerHTML = `
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+        </svg>`;
+    } else if (type === 'error') {
+      el.classList.add('lf-error');
+      iconWrap.className = 'lf-x';
+      iconWrap.innerHTML = `
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+        </svg>`;
+    } else {
+      // loading/info → círculo girando
+      iconWrap.className = 'lf-ring';
+      iconWrap.innerHTML = '';
+    }
+
+    textNode.textContent = message;
   }
 
   // ---------------------------
@@ -136,9 +133,7 @@
 
   function validateFields() {
     let allValid = true;
-    REQUIRED.forEach(id => {
-      if (!checkField(id)) allValid = false;
-    });
+    REQUIRED.forEach(id => { if (!checkField(id)) allValid = false; });
     return allValid;
   }
 
@@ -146,66 +141,54 @@
     REQUIRED.forEach(id => {
       const el = $(id);
       if (!el) return;
-      ['input', 'change', 'blur'].forEach(evt => {
-        el.addEventListener(evt, () => checkField(id));
-      });
+      ['input','change','blur'].forEach(evt => el.addEventListener(evt, () => checkField(id)));
     });
   }
 
   // ---------------------------
-  // 🎯 Animación circular del botón
+  // Botón: loading / success / error
   // ---------------------------
   function showButtonLoading(btn) {
+    ensureSpinnerStyles();
     btn.disabled = true;
-    btn.classList.add('relative','cursor-not-allowed','opacity-80');
+    btn.classList.add('relative');
     btn.innerHTML = `
-      <span class="absolute inset-0 flex items-center justify-center">
-        <svg class="animate-spin h-6 w-6 text-white" viewBox="0 0 50 50">
-          <circle class="opacity-20" cx="25" cy="25" r="20" stroke="currentColor" stroke-width="5" fill="none"></circle>
-          <circle class="opacity-80" cx="25" cy="25" r="20" stroke="currentColor" stroke-width="5" fill="none"
-            stroke-linecap="round" stroke-dasharray="80" stroke-dashoffset="60"></circle>
-        </svg>
-      </span>
+      <span class="lf-btnring" aria-hidden="true"></span>
     `;
   }
 
   function showButtonSuccess(btn) {
     btn.innerHTML = `
-      <span class="absolute inset-0 flex items-center justify-center text-green-400 transition-transform scale-110">
-        <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
+      <span class="lf-ok lf-success" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
           <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
         </svg>
-      </span>
-    `;
+      </span>`;
     setTimeout(() => {
       btn.disabled = false;
-      btn.classList.remove('cursor-not-allowed','opacity-80');
-      btn.innerHTML = 'Suscribirme';
-    }, 1500);
+      btn.textContent = 'Suscribirme';
+    }, 1200);
   }
 
   function showButtonError(btn) {
     btn.innerHTML = `
-      <span class="absolute inset-0 flex items-center justify-center text-red-400 transition-transform scale-110">
-        <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
+      <span class="lf-x lf-error" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
           <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
         </svg>
-      </span>
-    `;
+      </span>`;
     setTimeout(() => {
       btn.disabled = false;
-      btn.classList.remove('cursor-not-allowed','opacity-80');
-      btn.innerHTML = 'Suscribirme';
-    }, 1500);
+      btn.textContent = 'Suscribirme';
+    }, 1200);
   }
 
   // ---------------------------
-  // 🚀 Envío principal
+  // Envío principal
   // ---------------------------
   async function handleSubmit(e){
     e.preventDefault();
-    const btn = $(BTN_ID);
-    const form = $(FORM_ID);
+    const btn  = $(BTN_ID);
 
     if (!validateFields()) {
       alert('Por favor revisa los campos marcados en rojo.');
@@ -215,42 +198,49 @@
     }
 
     showButtonLoading(btn);
-    setStatus('Enviando datos…', 'loading');
+    setStatus('Enviando datos…', 'info'); // muestra círculo girando
 
     try {
       if (typeof grecaptcha === 'undefined') throw new Error('reCAPTCHA no cargó');
 
-      await grecaptcha.ready(async () => {
-        const token = await grecaptcha.execute(SITE_KEY, { action: 'submit' });
+      // Importante: no usar await sobre ready()
+      grecaptcha.ready(() => {
+        grecaptcha.execute(SITE_KEY, { action: 'submit' })
+          .then(async (token) => {
+            const params = new URLSearchParams({
+              FNAME: val('mce-FNAME'),
+              EMAIL: val('mce-EMAIL'),
+              PHONE: val('mce-PHONE'),
+              SELECSTADO: val('mce-SELECSTADO'),
+              PUESTOEMP: val('mce-PUESTOEMP'),
+              REQUIERE: val('mce-REQUIERE'),
+              EQUIPO: val('mce-EQUIPO'),
+              ASESORIA: val('mce-ASESORIA'),
+              TIPO: val('mce-TIPO'),
+              ADITAMIENT: val('mce-ADITAMIENT'),
+              MENSAJE: val('mce-MENSAJE'),
+              recaptcha_token: token
+            });
 
-        const params = new URLSearchParams({
-          FNAME: val('mce-FNAME'),
-          EMAIL: val('mce-EMAIL'),
-          PHONE: val('mce-PHONE'),
-          SELECSTADO: val('mce-SELECSTADO'),
-          PUESTOEMP: val('mce-PUESTOEMP'),
-          REQUIERE: val('mce-REQUIERE'),
-          EQUIPO: val('mce-EQUIPO'),
-          ASESORIA: val('mce-ASESORIA'),
-          TIPO: val('mce-TIPO'),
-          ADITAMIENT: val('mce-ADITAMIENT'),
-          MENSAJE: val('mce-MENSAJE'),
-          recaptcha_token: token
-        });
+            const res = await fetch('/api/submit', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+              body: params.toString()  // <- seguro para x-www-form-urlencoded
+            });
 
-        const res = await fetch('/api/submit', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-          body: params
-        });
+            if (!res.ok) throw new Error('Error al enviar');
 
-        if (!res.ok) throw new Error('Error al enviar');
-
-        setStatus('¡Enviado correctamente! Redirigiendo…', 'success');
-        showButtonSuccess(btn);
-        setTimeout(() => {
-          window.location.href = 'https://www.xilinslp.com.mx/gracias-renta-montacarga';
-        }, 700);
+            setStatus('¡Enviado correctamente! Redirigiendo…', 'success');
+            showButtonSuccess(btn);
+            setTimeout(() => {
+              window.location.href = 'https://www.xilinslp.com.mx/gracias-renta-montacarga';
+            }, 700);
+          })
+          .catch((err) => {
+            console.error(err);
+            setStatus('Error al enviar. Intenta de nuevo.', 'error');
+            showButtonError(btn);
+          });
       });
     } catch (err) {
       console.error(err);
@@ -260,15 +250,15 @@
   }
 
   // ---------------------------
-  // 🧰 Montaje
+  // Montaje
   // ---------------------------
   function mount(){
     const form = $(FORM_ID);
     if (!form) { LOG('Form no encontrado:', FORM_ID); return; }
+    ensureStatusEl(); // crea el estado con el spinner
     form.addEventListener('submit', handleSubmit);
-    ensureStatusEl();           // crea el estado con el círculo
     enableLiveValidation();
-    LOG('Formulario listo con validación y spinner circular');
+    LOG('Formulario listo con validación y círculo animado propio');
   }
 
   if (document.readyState === 'loading') {
