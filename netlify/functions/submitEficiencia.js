@@ -26,7 +26,7 @@ exports.handler = async (event) => {
     }
 
     // --- ENV secrets ---
-    const APPS_SCRIPT_ENDPOINT = process.env.APPS_SCRIPT_ENDPOINT; // URL /exec
+    const APPS_SCRIPT_ENDPOINT_EFICIENCIA = process.env.APPS_SCRIPT_ENDPOINT_EFICIENCIA; // URL /exec
     const RECAPTCHA_SECRET     = process.env.RECAPTCHA_SECRET;     // secret v3
 
     // --- Parse body (x-www-form-urlencoded | json) ---
@@ -124,9 +124,9 @@ exports.handler = async (event) => {
     let forwardCode = 0;
     let forwardText = '';
 
-    if (APPS_SCRIPT_ENDPOINT) {
+    if (APPS_SCRIPT_ENDPOINT_EFICIENCIA) {
       try {
-        const res = await fetch(APPS_SCRIPT_ENDPOINT, {
+        const res = await fetch(APPS_SCRIPT_ENDPOINT_EFICIENCIA, {
           method: 'POST',
           headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
           body: new URLSearchParams(mapped).toString(),
@@ -140,7 +140,7 @@ exports.handler = async (event) => {
         console.error('[submitEficiencia] GAS forward error:', e);
       }
     } else {
-      console.error('[submitEficiencia] APPS_SCRIPT_ENDPOINT no configurado');
+      console.error('[submitEficiencia] APPS_SCRIPT_ENDPOINT_EFICIENCIA no configurado');
     }
 
     // 5) Respuesta al front
