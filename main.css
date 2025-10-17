@@ -36,13 +36,6 @@ textarea, input, select, button {
     color: #e85c41;
 }
 
-.mc-field-group.alto {
-    height: 100px;
-}
-#mce-MENSAJE, #mce-ADITAMIENT {
-    height: inherit;
-}
-
 #mc-embedded-subscribe {
     padding: 10px;
     filter: drop-shadow(0px 0px 12px #C93127);
@@ -59,7 +52,6 @@ textarea, input, select, button {
 .mc-field-group {
     display: flex;
     flex-direction: column;
-    width: calc(50% - 7.5px);
     height: auto;
     justify-content: space-between;
     gap: 2px;
@@ -86,7 +78,27 @@ label {
     width: 100%;
 }
 
+#mce-MENSAJE {
+    height: inherit;
+}
 
+@media (min-width: 768px) {
+    .mc-field-group.alto {
+        height: 100px;
+    }
+    .mc-field-group {
+        width: calc(50% - 7.5px);
+    }
+    #mce-ADITAMIENT {
+        height: inherit;
+    }
+}
+
+@media (max-width: 768px) {
+    .mc-field-group {
+        width: 100%;
+    }
+}
 
 
 
