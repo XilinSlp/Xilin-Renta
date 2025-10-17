@@ -1,10 +1,11 @@
 (() => {
-  const SITE_KEY  = '6LetH4sqAAAAADUkfe67jIEvLkRU0qcvaU2Vhe81'; // pública
+  const SITE_KEY  = '6LetH4sqAAAAADUkfe67jIEvLkRU0qcvaU2Vhe81'; // v3 (pública)
   const FORM_ID   = 'mc-embedded-subscribe-form';
   const BTN_ID    = 'mc-embedded-subscribe';
   const STATUS_ID = 'form-status';
   const THANK_YOU_URL = 'https://renta-xilin.netlify.app/gracias-renta-montacarga';
   const MC_IFRAME_NAME = 'mc-submit-bridge';
+  const BADGE_SLOT_ID  = 'recaptcha-badge-slot';
 
   const $ = id => document.getElementById(id);
   const val = id => ($(id)?.value || '').trim();
@@ -35,9 +36,21 @@
       .lf-ok svg,.lf-x svg{width:22px;height:22px}
       .lf-success{color:#22c55e}.lf-error{color:#ef4444}
       iframe[name="${MC_IFRAME_NAME}"]{display:none;width:0;height:0;border:0}
+
+      /* === reCAPTCHA v3: badge estático justo bajo el botón === */
+      #${BADGE_SLOT_ID} { margin-top:.5rem; }
+      #${BADGE_SLOT_ID} .grecaptcha-badge{
+        position: static !important;
+        right:auto !important; bottom:auto !important;
+        box-shadow:none !important; transform:none !important;
+      }
+      #${BADGE_SLOT_ID} .grecaptcha-badge iframe{
+        transform:scale(.95); transform-origin:left top;
+      }
     `;
     document.head.appendChild(s);
   }
+
   function ensureStatusEl(){
     injectStyles();
     let el = $(STATUS_ID);
@@ -88,7 +101,7 @@
     ['input','change','blur'].forEach(evt=>el.addEventListener(evt,()=>checkField(id)));
   });}
 
-  // ---------- Mailchimp bridge (no saca al usuario) ----------
+  // ---------- Mailchimp bridge ----------
   function ensureMcIframe(){
     let iframe=document.querySelector(`iframe[name="${MC_IFRAME_NAME}"]`);
     if(!iframe){iframe=document.createElement('iframe'); iframe.name=MC_IFRAME_NAME; document.body.appendChild(iframe);}
@@ -111,6 +124,36 @@
     <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg></span>`;
     setTimeout(()=>{btn.disabled=false; btn.textContent='Suscribirme';},1200);}
 
+  // ---------- reCAPTCHA v3: badge estático ----------
+  function ensureBadgeSlot(){
+    if ($(BADGE_SLOT_ID)) return $(BADGE_SLOT_ID);
+    const btn = $(BTN_ID);
+    if (!btn) return null;
+    const slot = document.createElement('div');
+    slot.id = BADGE_SLOT_ID;
+    // Insertamos justo después del botón
+    btn.insertAdjacentElement('afterend', slot);
+    return slot;
+  }
+  function placeV3Badge(){
+    const slot = ensureBadgeSlot(); if (!slot) return;
+    const tryMove = () => {
+      const badge = document.querySelector('.grecaptcha-badge');
+      if (badge && slot.firstChild !== badge) {
+        slot.appendChild(badge);
+        badge.style.position = 'static';
+        badge.style.right = 'auto';
+        badge.style.bottom = 'auto';
+        console.log('[reCAPTCHA v3] badge movido al slot');
+        return true;
+      }
+      return false;
+    };
+    if (tryMove()) return;
+    // reintentos breves por si el badge todavía no existe
+    let n=0; const id=setInterval(()=>{ if (tryMove() || ++n>30) clearInterval(id); },100);
+  }
+
   // ---------- envío ----------
   let isSubmitting=false;
   function handleSubmit(ev){
@@ -126,7 +169,6 @@
     isSubmitting=true; showButtonLoading(btn); setStatus('Enviando datos…','loading');
 
     const sendBoth=(token)=>{
-      // Payload para la Function (se Reenvía a Apps Script con los mismos nombres)
       const params = new URLSearchParams({
         FNAME: val('mce-FNAME'), EMAIL: val('mce-EMAIL'), PHONE: val('mce-PHONE'),
         SELECSTADO: val('mce-SELECSTADO'), PUESTOEMP: val('mce-PUESTOEMP'),
@@ -137,17 +179,14 @@
       });
       console.log('[LeadForm] payload ->', Object.fromEntries(params));
 
-      // 1) Netlify Function (verifica captcha + reenvía a Google Apps Script)
       fetch('/api/submit', {
         method:'POST',
         headers:{'Content-Type':'application/x-www-form-urlencoded'},
         body: params.toString()
       }).catch(err=>console.error('[LeadForm] Function error:',err));
 
-      // 2) Mailchimp (action) en iframe
       submitToMailchimp(form);
 
-      // UX local
       setStatus('¡Enviado correctamente! Redirigiendo…','success');
       showButtonSuccess(btn);
       setTimeout(()=>{window.location.href=THANK_YOU_URL;},700);
@@ -164,9 +203,14 @@
 
   function mount(){
     const form=$(FORM_ID); if(!form) return;
-    ensureStatusEl(); ensureMcIframe();
+    ensureStatusEl(); ensureMcIframe(); ensureBadgeSlot();
     form.addEventListener('submit',handleSubmit); enableLiveValidation();
-    console.log('[LeadForm] listo');
+    // mover el badge cuando grecaptcha esté listo
+    const ready = () => (window.grecaptcha && grecaptcha.ready)
+      ? grecaptcha.ready(placeV3Badge)
+      : setTimeout(ready,100);
+    ready();
+    console.log('[LeadForm] listo (v3 con badge estático)');
   }
 
   document.readyState==='loading'?document.addEventListener('DOMContentLoaded',mount):mount();

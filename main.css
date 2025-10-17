@@ -100,5 +100,25 @@ label {
     }
 }
 
+/* reCAPTCHA v3: forzar el badge a NO fixed y a verse debajo del botón */
+#recaptcha-badge-slot .grecaptcha-badge {
+  position: static !important;
+  right: auto !important;
+  bottom: auto !important;
+  box-shadow: none !important;
+  margin-top: .5rem;         /* separacion del botón */
+  transform: none !important;
+}
+
+/* opcional: reducir el badge un poquito (sin ocultarlo) */
+#recaptcha-badge-slot .grecaptcha-badge iframe {
+  transform: scale(.95);        /* 0.85–1 según te guste */
+  transform-origin: left top;
+}
+
+#recaptcha-badge-slot {
+    display: flex;
+    justify-content: center;
+}
 
 
