@@ -8,25 +8,22 @@
   const MC_IFRAME_NAME = 'mc-submit-bridge';
   const BADGE_SLOT_ID  = 'recaptcha-badge-slot';
 
-  const $ = id => document.getElementById(id);
+  const $   = id => document.getElementById(id);
   const val = id => ($(id)?.value || '').trim();
 
-  // ==== TU ARRAY ORIGINAL (SE RESPETA) ====
+  // ==== REQUERIDOS EXACTOS DEL FORM PRESENTE ====
   const REQUIRED = [
-    'mce-FNAME','mce-EMAIL','mce-PHONE','mce-SELECSTADO','mce-REQUIERE',
-    'mce-EQUIPO','mce-ASESORIA','mce-TIPO','mce-ADITAMIENT','mce-MENSAJE','mce-PUESTOEMP'
+    'mce-FNAME',     // name
+    'mce-EMAIL',     // email
+    'mce-PHONE',     // phone
+    'mce-CONFIRNUM', // phoneConfirm
+    'mce-MMERGE15',  // estado
+    'mce-PUESTOEMP', // puesto
+    'mce-EQUIPO',    // equipo
+    'mce-MMERGE18',  // define
+    'mce-TIPO',      // tipo
+    'mce-MENSAJE'    // mensaje
   ];
-
-  // ==== SOPORTE PARA EL FORM NUEVO (se auto-detecta) ====
-  // Si detectamos campos del nuevo formulario, usamos éste set como "requeridos efectivos".
-  const REQUIRED_NEW = [
-    'mce-FNAME','mce-EMAIL','mce-PHONE','mce-CONFIRNUM','mce-MMERGE15',
-    'mce-EQUIPO','mce-MMERGE18','mce-TIPO','mce-MENSAJE','mce-PUESTOEMP'
-  ];
-  function pickRequired() {
-    // Si existe mce-MMERGE15 o mce-CONFIRNUM, asumimos variante nueva
-    return ($('#mce-MMERGE15') || $('#mce-CONFIRNUM')) ? REQUIRED_NEW : REQUIRED;
-  }
 
   // ---------- estilos / status ----------
   function injectStyles(){
@@ -103,10 +100,9 @@
   }
 
   function validateFields(){
-    const req = pickRequired();
-    let all=true; req.forEach(id=>{ if(!checkField(id)) all=false; });
-    // Si existe confirmación, además comparar
-    if (all && $('#mce-CONFIRNUM')) {
+    let all=true; REQUIRED.forEach(id=>{ if(!checkField(id)) all=false; });
+    // Comparación estricta de teléfono
+    if (all) {
       const p = val('mce-PHONE').replace(/\s+/g,'');
       const c = val('mce-CONFIRNUM').replace(/\s+/g,'');
       if (p !== c) { alert('Por favor, compruebe nuevamente su número de teléfono'); all=false; }
@@ -115,7 +111,7 @@
     return all;
   }
   function enableLiveValidation(){
-    pickRequired().forEach(id=>{
+    REQUIRED.forEach(id=>{
       const el=$(id); if(!el) return;
       ['input','change','blur'].forEach(evt=>el.addEventListener(evt,()=>checkField(id)));
     });
@@ -167,34 +163,30 @@
 
   // ---------- envío ----------
   let isSubmitting=false;
+
   function handleSubmitForm(token) {
     const form = $(FORM_ID);
 
-    // Resolver valores para ambos formularios
-    const name    = val('mce-FNAME');
-    const email   = val('mce-EMAIL');
-    const phone   = val('mce-PHONE');
-    const puesto  = val('mce-PUESTOEMP');
-    const tipo    = val('mce-TIPO');
-    const mensaje = val('mce-MENSAJE');
-    const equipo  = val('mce-EQUIPO');
+    // Leer campos EXACTOS del formulario actual
+    const name        = val('mce-FNAME');
+    const email       = val('mce-EMAIL');
+    const phone       = val('mce-PHONE');
+    const phoneConfirm= val('mce-CONFIRNUM');
+    const estado      = val('mce-MMERGE15');
+    const equipo      = val('mce-EQUIPO');
+    const define      = val('mce-MMERGE18');
+    const tipo        = val('mce-TIPO');
+    const mensaje     = val('mce-MENSAJE');
+    const puesto      = val('mce-PUESTOEMP');
 
-    // estado: preferir MMERGE15 y si no, SELECSTADO
-    const estado  = $('#mce-MMERGE15') ? val('mce-MMERGE15') : val('mce-SELECSTADO');
-
-    // define: preferir MMERGE18 (nueva) y si no, REQUIERE (original)
-    const define  = $('#mce-MMERGE18') ? val('mce-MMERGE18') : val('mce-REQUIERE');
-
-    // confirmación de teléfono si existe
-    if ($('#mce-CONFIRNUM')) {
-      const phoneConfirm = val('mce-CONFIRNUM');
-      if (phone.replace(/\s+/g,'') !== phoneConfirm.replace(/\s+/g,'')) {
-        alert('Por favor, compruebe nuevamente su número de teléfono');
-        const btn=$(BTN_ID); showButtonError(btn); setStatus('Hay errores en el formulario.','error');
-        isSubmitting=false; return;
-      }
+    // Doble seguridad con teléfonos
+    if (phone.replace(/\s+/g,'') !== phoneConfirm.replace(/\s+/g,'')) {
+      alert('Por favor, compruebe nuevamente su número de teléfono');
+      const btn=$(BTN_ID); showButtonError(btn); setStatus('Hay errores en el formulario.','error');
+      isSubmitting=false; return;
     }
 
+    // Payload EXACTO que pediste
     const payload = {
       name, email, phone, puesto, estado, equipo, define, tipo, mensaje,
       recaptcha_token: token,
@@ -216,7 +208,7 @@
       console.log('[LeadForm] función OK:', data);
       setStatus('¡Enviado correctamente! Redirigiendo…','success');
       showButtonSuccess($(BTN_ID));
-      // enviar también a Mailchimp (bridge) tal como tu lógica
+      // Envío paralelo a Mailchimp (mantiene tus registros en la lista)
       submitToMailchimp(form);
       setTimeout(()=>{window.location.href=THANK_YOU_URL;},700);
     })
@@ -250,14 +242,14 @@
   function mount(){
     const form=$(FORM_ID); if(!form) return;
     ensureStatusEl(); ensureMcIframe(); ensureBadgeSlot();
-    form.setAttribute('novalidate',''); // mantener UX consistente
+    form.setAttribute('novalidate',''); // UX consistente
     form.addEventListener('submit',handleSubmit);
     const ready = () => (window.grecaptcha && grecaptcha.ready)
       ? grecaptcha.ready(placeV3Badge)
       : setTimeout(ready,100);
     ready();
     enableLiveValidation();
-    console.log('[LeadForm] listo (compat A/B, v3 con badge estático)');
+    console.log('[LeadForm] listo (IDs exactos, v3 con badge estático)');
   }
   document.readyState==='loading'?document.addEventListener('DOMContentLoaded',mount):mount();
 })();
