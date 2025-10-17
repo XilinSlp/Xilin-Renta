@@ -128,3 +128,7 @@ a{
     text-align: center;
 }
 
+lite-youtube.lyt-activated {
+    margin: auto;
+    z-index: 2;
+}
