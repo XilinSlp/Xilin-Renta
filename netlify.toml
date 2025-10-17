@@ -10,3 +10,8 @@ node_bundler = "esbuild"
   from = "/api/submit"
   to = "/.netlify/functions/submit"
   status = 200
+
+[[redirects]]
+  from = "/api/submit-eficiencia"
+  to = "/.netlify/functions/submitEficiencia"
+  status = 200
