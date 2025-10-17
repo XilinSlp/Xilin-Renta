@@ -132,3 +132,10 @@ lite-youtube.lyt-activated {
     margin: auto;
     z-index: 2;
 }
+
+#whatsapp {
+    position: fixed;
+    z-index: 11;
+    bottom: 30px;
+    right: 15px;
+}
