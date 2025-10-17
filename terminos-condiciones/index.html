@@ -95,29 +95,41 @@
 
 <body class="bg-neutral-950 text-white antialiased">
 
-  <!-- NAVBAR -->
-  <header class="bg-white shadow-sm">
-    <nav class="h-14 flex items-center justify-between">
-      <a href="/" class="inline-flex items-center h-full pl-3">
-        <img src="../assets/banners/xilin-logo-negro.svg" alt="Xilin México" class="block h-8 w-auto" loading="eager" />
-      </a>
+        <!-- NAVBAR -->
+        <header class="bg-white shadow-sm">
+            <!-- Sin padding para que los íconos queden realmente “a la orilla” -->
+            <nav class="h-14 flex items-center justify-between">
+                <!-- Logo a la izquierda (área clickeable amplia) -->
+                <a href="/" class="inline-flex items-center h-full pl-3">
+                    <img src="../assets/banners/xilin-logo-negro.svg" alt="Tu marca" class="block h-8 w-auto"
+                        loading="eager" fetchpriority="high" />
+                </a>
 
-      <div class="ml-auto flex">
-        <a href="https://www.instagram.com/xilinslp" target="_blank" rel="noopener" aria-label="Instagram"
-          class="inline-flex items-center justify-center h-14 w-14 hover:bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-neutral-300">
-          <img src="../assets/iconos/ig.webp" width="25px" alt="">
-        </a>
-        <a href="https://www.linkedin.com/company/xilinslp/posts/?feedView=all&viewAsMember=true" target="_blank" rel="noopener" aria-label="LinkedIn"
-          class="inline-flex items-center justify-center h-14 w-14 hover:bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-neutral-300">
-          <img src="../assets/iconos/in.webp" width="25px" alt="">
-        </a>
-        <a href="https://www.facebook.com/people/Xilinslp/61564573953947/" target="_blank" rel="noopener" aria-label="Facebook"
-          class="inline-flex items-center justify-center h-14 w-14 hover:bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-neutral-300">
-          <img src="../assets/iconos/fb.webp" width="25px" alt="">
-        </a>
-      </div>
-    </nav>
-  </header>
+                <!-- Redes a la derecha, cada ícono con borde separador y pegados al borde -->
+                <div class="ml-auto flex">
+                    <a href="https://www.instagram.com/xilinslp" aria-label="Instagram"
+                        class="inline-flex items-center justify-center h-14 w-14  hover:bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-neutral-300"
+                        target="_blank" rel="noopener">
+                        <!-- Instagram SVG -->
+                        <img src="../assets/iconos/ig.webp" width="25px" alt="">
+                    </a>
+
+                    <a href="https://www.linkedin.com/authwall?trkInfo=AQFgmDblww9WvAAAAZk7K5EYKpKcZekYNmXhUlMxLfCHp5UpM_GCFGIP0Ud1J50leeBMxgS3Kg1gRlycD7uIigjbVn8HUctbV_32mA2BMC2gS6im8YySRkO1CjusNQHyy4bumM8=&original_referer=&sessionRedirect=https%3A%2F%2Fwww.linkedin.com%2Fcompany%2Fxilinslp%2Fposts%2F%3FfeedView%3Dall%26viewAsMember%3Dtrue"
+                        aria-label="LinkedIn"
+                        class="inline-flex items-center justify-center h-14 w-14  hover:bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-neutral-300"
+                        target="_blank" rel="noopener">
+                        <!-- linke -->
+                        <img src="../assets/iconos/in.webp" width="25px" alt="">
+                    </a>
+                    <a href="https://www.facebook.com/people/Xilinslp/61564573953947/" aria-label="Facebook"
+                        class="inline-flex items-center justify-center h-14 w-14  hover:bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-neutral-300"
+                        target="_blank" rel="noopener">
+                        <!-- fb -->
+                        <img src="../assets/iconos/fb.webp" width="25px" alt="">
+                    </a>
+                </div>
+            </nav>
+        </header>
 
   <!-- CONTENIDO PRINCIPAL -->
   <main>
