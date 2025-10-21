@@ -4,7 +4,7 @@
   const FORM_ID   = 'mc-embedded-subscribe-form';
   const BTN_ID    = 'mc-embedded-subscribe';
   const STATUS_ID = 'form-status';
-  const THANK_YOU_URL = 'https://renta-xilin.netlify.app/thank-you62433527';
+  const THANK_YOU_URL = 'https://xilin-landing.netlify.app/thank-you62433527';
   const MC_IFRAME_NAME = 'mc-submit-bridge';
   const BADGE_SLOT_ID  = 'recaptcha-badge-slot';
 
