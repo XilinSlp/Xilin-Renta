@@ -47,6 +47,7 @@ textarea, input, select, button {
     line-height: normal;
     border: 0px;
     border-radius: 8px;
+    cursor: pointer;
 }
 
 .mc-field-group {
